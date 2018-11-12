@@ -1,0 +1,2 @@
+# AkuSenangSekaliPUBG
+bahasa prolog
