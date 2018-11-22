@@ -15,31 +15,46 @@ list_to_matrix_row([Item|List], Size, [Item|Row], Tail):-
   NSize is Size-1,
   list_to_matrix_row(List, NSize, Row, Tail).
 
-/*Fungsi append*/
-mappend([], X, X) :- !.
-mappend([A|B],C,[A|D]) :- mappend(B, C, D).
-
 /*Fungsi print matrix*/
 printmatrix([]) :- !.
-printmatrix([A|B]):- printlist(A),nl,printmatrix(B).
+printmatrix([A|B]):- printmatrix(B),printlist(A),nl.
 
 /*Fungsi Print List*/
 printlist([]) :- !.
-printlist([A|B]) :- print(A),printlist(B).
+printlist([A|B]) :- printlist(B),print(A).
 
-/*Fungsi Wall Generator*/
+/*----------------Fungsi Wall Generator--------------------*/
+
+/*Tembok atas & bawah*/
 wall(0,[]):- !.
 wall(A,[x|B]):- C is A-1, wall(C,B).
 printwall(A) :- wall(A,B),printlist(B),nl.
 
-sidewall(0,[x|[]]):- !.
-sidewall(A,[x|B]) :- C is A-2, arena(C,B).
+/*Fungsi menggambar map AxA*/
+printgame(A) :- game(A,B,A,4,6,3),printmatrix(B).
+/*
+param1 nilai sama dengan param3 (utk iterasi)
+param2 hasil matriks
+param3 luas lapangan
+param4 lebar deadzone
+param5 koordinat x player
+param6 koordinat y player
+*/
 
-arena(0,B):- sidewall(0,B).
-arena(A,[-|B]):- C is A-1, arena(C,B).
-printarena(A) :- sidewall(A,B),printlist(B),nl.
+side(0,[],M,T):- !.
+side(A,[x|B],M,T):- N is M-T,A > N,!,C is A-1,side(C,B,M,T).
+side(A,[x|B],M,T):- A =< T,!,C is A-1,side(C,B,M,T).
+side(A,[-|B],M,T):- C is A-1,side(C,B,M,T).
+/*Menaruh Player*/
+sidep(0,[],M,T,X):- !.
+sidep(A,[p|B],M,T,X):- A=:=X,!,C is A-1,sidep(C,B,M,T,X).
+sidep(A,[x|B],M,T,X):- N is M-T,A > N,!,C is A-1,sidep(C,B,M,T,X).
+sidep(A,[x|B],M,T,X):- A =< T,!,C is A-1,sidep(C,B,M,T,X).
+sidep(A,[-|B],M,T,X):- C is A-1,sidep(C,B,M,T,X).
 
-printgame(A) :- printwall(A),C is A-2,printmid(C,A).
 
-printmid(A,B):- A =:=0,!,printwall(B),!.
-printmid(A,B):- A > 0,!,printarena(B),C is A-1,printmid(C,B).
+game(0,[],M,T,X,Y):- !.
+game(A,[C|B],M,T,X,Y) :- N is M-T,A > N,!,wall(M,C),D is A-1,game(D,B,M,T,X,Y).
+game(A,[C|B],M,T,X,Y) :- A=<T,!,wall(M,C),D is A-1,game(D,B,M,T,X,Y).
+game(A,[C|B],M,T,X,Y) :- A=:=Y,!,sidep(M,C,M,T,X),D is A-1,game(D,B,M,T,X,Y).
+game(A,[C|B],M,T,X,Y) :- side(M,C,M,T),D is A-1,game(D,B,M,T,X,Y).
