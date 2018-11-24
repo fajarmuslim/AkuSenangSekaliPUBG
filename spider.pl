@@ -1,9 +1,9 @@
-
+/*
 CSC 8310   Linguistics of Programming Languages
 Dr. David Matuszek
 Fall 1997, Villanova University
 Source code for "Spider" adventure game
-
+*/
 /* SPIDER -- a sample adventure game, by David Matuszek.
    Consult this file and issue the command "start."  */
 
