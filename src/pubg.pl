@@ -7,6 +7,7 @@
 
 
 /*DEFINISI WEAPON DAN AMMO*/
+
 /*weapon(NAMA,DAMAGE)*/
 weapon(ak47,20).
 weapon(m4a1,15).
@@ -24,13 +25,21 @@ medic(plester,20).
 armor(helm,2).
 armor(kevlar,5).
 
+/**/
+
+
 /*DEFINISI MAP AWAL*/
 
 
 /*RULE*/
 
-/*MOVE PLAYER OR ENEMY*/
+/*===========RULE DASAR==============*/
+/*GENERATE RANDOM POSISITION*/
 
+
+/*===========RULE COMMAND==============*/
+
+/*MOVE PLAYER OR ENEMY*/
 
 /*PRINT MAP*/
 
