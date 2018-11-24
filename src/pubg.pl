@@ -1,34 +1,57 @@
 /*SEBUAH GAME PUBG DENGAN PROLOG*/
 
-/*DEFINISI STAT PLAYER AWAL DAN ENEMY*/
+/*----------------------DEFINISI STAT PLAYER AWAL DAN ENEMY----------------------*/
+/* Dynamic untuk mencatat posisi player*/
+:-dynamic(pemain/2).
 
+/*Fakta Enemy*/
+enemy(tuyul).
 
+/*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
 
+/*Fakta Weapon*/
+weapon(ak47).
+weapon(m4a1).
 
-
-/*DEFINISI WEAPON DAN AMMO*/
+/* Fakta Ammo*/
+ammo(ammo_ak47).
+ammo(ammo_m4a1).
 
 /*weapon(NAMA,DAMAGE)*/
-weapon(ak47,20).
-weapon(m4a1,15).
+damage(ak47,20).
+damage(m4a1,15).
 /*ammo(NAMA,MAGSIZE)*/
-ammo(aka47,20).
-ammo(m4a1,15).
+magsize(ak47,20).
+magsize(m4a1,15).
 
-/*DEFINISI MEDICINE*/
+/*----------------------DEFINISI MEDICINE----------------------*/
+
+/*Fakta Medic*/
+medic(pill).
+medic(plester).
+
 /*medic(NAMA,HEAL)*/
-medic(pill,10).
-medic(plester,20).
+heal(pill,10).
+heal(plester,20).
 
-/*DEFINISI ARMOR*/
+/*----------------------DEFINISI ARMOR----------------------*/
+
+/*Fakta Armor*/
+armor(helm).
+armor(kevlar).
+
 /*armor(NAMA,DEFEND)*/
-armor(helm,2).
-armor(kevlar,5).
+defense(helm,2).
+defense(kevlar,5).
 
-/**/
+/*----------------------DEFINISI OBJEK----------------------*/
+/* Segala sesuatu yang ada di lapangan */
+/* obj(nama,koord.x,koord.y)  :-dynamic(obj/3). */
 
+obj(ak47,5,5).
+obj(helm,5,5).
 
-/*DEFINISI MAP AWAL*/
+/*----------------------DEFINISI MAP AWAL----------------------*/
 
 
 /*RULE*/
@@ -39,10 +62,11 @@ armor(kevlar,5).
 
 /*===========RULE COMMAND==============*/
 
-/*MOVE PLAYER OR ENEMY*/
+/*----------------------MOVE PLAYER OR ENEMY----------------------*/
 
-/*PRINT MAP*/
+/*----------------------PRINT MAP----------------------*/
 /*Fungsi Gerak*/
+/* masukin A bebas, gak ada pengaruh */
 n(A) :- pemain(X,Y),Z is Y-1,retract(pemain(X,Y)),asserta(pemain(X,Z)).
 s(A) :- pemain(X,Y),Z is Y+1,retract(pemain(X,Y)),asserta(pemain(X,Z)).
 w(A) :- pemain(X,Y),Z is X-1,retract(pemain(X,Y)),asserta(pemain(Z,Y)).
@@ -51,6 +75,7 @@ e(A) :- pemain(X,Y),Z is X+1,retract(pemain(X,Y)),asserta(pemain(Z,Y)).
 /*Fungsi menggambar map AxA*/
 map(A) :- pemain(X,Y),game(A,B,A,1,X,Y),printmatrix(B).
 /*
+utk game :
 param1 nilai sama dengan param3 (utk iterasi)
 param2 hasil matriks
 param3 luas lapangan
@@ -80,11 +105,22 @@ game(A,[C|B],M,T,X,Y) :- A=<T,!,wall(M,C),D is A-1,game(D,B,M,T,X,Y).
 game(A,[C|B],M,T,X,Y) :- A=:=Y,!,sidep(M,C,M,T,X),D is A-1,game(D,B,M,T,X,Y).
 game(A,[C|B],M,T,X,Y) :- side(M,C,M,T),D is A-1,game(D,B,M,T,X,Y).
 
-/*INCREASE DEADZONE*/
+/*Fungsi print matrix*/
+printmatrix([]) :- !.
+printmatrix([A|B]):- printmatrix(B),printlist(A),nl.
+
+/*Fungsi Print List*/
+printlist([]) :- !.
+printlist([A|B]) :- printlist(B),print(A).
+
+/*----------------------INCREASE DEADZONE----------------------*/
 /* Perlu catat waktu*/
 
-/*LOOK*/
-look(X,Y) :- game(10,B,10,1,X,Y),looky(10,B,C,10,X,Y),printmatrix(C).
+/*----------------------LOOK----------------------*/
+
+/* Fungsi Look Utama*/
+/* look dengan pusat X,Y*/
+look(X,Y) :- pemain(M,N),game(10,B,10,1,M,N),looky(10,B,C,10,X,Y),cek_obj(C,D,X,Y),printmatrix(D).
 
 looky(A,[D|B],[C|[]],M,X,Y) :- Z is Y-1,A =:= Z,!,lookx(M,D,C,M,X).
 looky(A,[D|B],[C|F],M,X,Y):- A=:=Y,!,lookx(M,D,C,M,X),E is A-1,looky(E,B,F,M,X,Y).
@@ -96,14 +132,33 @@ lookx(A,[D|B],[D|C],M,X):- A=:=X,!,E is A-1,lookx(E,B,C,M,X).
 lookx(A,[D|B],[D|C],M,X):- Z is X+1,A =:= Z,!,E is A-1,lookx(E,B,C,M,X).
 lookx(A,[D|B],C,M,X):- E is A-1,lookx(E,B,C,M,X).
 
-/*TAKE*/
+/* Mengecek objek di lokasi look*/
+cek_obj(A,B,X,Y):- V is X+1,W is Y+1,cek_objy(A,B,V,W).
 
-/*DROP*/
+cek_objy([],[],X,Y):- !.
+cek_objy([A|B],[D|E],X,Y):- cek_objx(A,D,X,Y),W is Y-1,cek_objy(B,E,X,W).
 
-/*USE*/
+cek_objx([],[],X,Y):- !.
+cek_objx([A|B],[Z|D],X,Y):- priority(X,Y,Z),!,V is X-1,cek_objx(B,D,V,Y).
+cek_objx([A|B],[A|D],X,Y):- V is X-1,cek_objx(B,D,V,Y).
 
-/*ATTACK*/(FAIL DAN GOAL STATE DI CEK DISINI)
+/* Mengecek prioritas objek*/
+/*Enemy > Medicine > Weapon > Armor > Ammo > pemain*/
 
-/*STATUS*/
+priority(X,Y,'e ') :- obj(E,X,Y),enemy(E),!.
+priority(X,Y,'m ') :- obj(M,X,Y),medic(M),!.
+priority(X,Y,'w ') :- obj(W,X,Y),weapon(W),!.
+priority(X,Y,'r ') :- obj(R,X,Y),armor(R),!.
+priority(X,Y,'a ') :- obj(A,X,Y),ammo(A),!.
 
-/*START*/
+/*----------------------TAKE----------------------*/
+
+/*----------------------DROP----------------------*/
+
+/*----------------------USE----------------------*/
+
+/*----------------------ATTACK (FAIL DAN GOAL STATE DI CEK DISINI)---------------------- */
+
+/*----------------------STATUS----------------------*/
+
+/*----------------------START----------------------*/
