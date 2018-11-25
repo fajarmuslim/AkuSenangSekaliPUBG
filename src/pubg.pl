@@ -122,8 +122,8 @@ moveenemy :- musuh(Nama,X,Y,M,N,O,P),
 							retract(musuh(Nama,X,Y,M,N,O,P)),
 							asserta(musuh(Nama,V,W,M,N,O,P)),
 							write(Nama),
-							write(' bergerak ke :'),write(V),write(' '),write(W),nl.
-
+							write(' bergerak ke :'),write(V),write(' '),write(W),nl,fail.
+moveenemy :- !.
 /*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
 
 /*Fakta Weapon*/
@@ -336,14 +336,14 @@ inside_deadzone:- musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMu
 										asserta(musuh(Nama,X,Y,0,SenjataMusuh,PeluruMusuh,PelindungMusuh)).
 
 inside_deadzone:- pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
-									deadzoneCounter(Time,Size), Z is 20-Size,
+									deadzoneCounter(Time,Size), Z is 21-Size,
 									(X =< Size ; X>= Z ; Y =< Size ; Y >= Z ),!,
 									retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
 									asserta(pemain(X,Y,0,Senjata,Peluru,Pelindung)).
 inside_deadzone:- nl.
 
-final_state:- pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),Sehat =< 0,!,write('Kamu Kalah'),nl.
-final_state:- jumlahmusuh(0),!,write('Kamu Menang'),nl.
+final_state:- pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),Sehat =< 0,!,write('Kamu Kalah'),nl,write('Makasih udah main'),nl,!,fail.
+final_state:- jumlahmusuh(0),!,write('Kamu Menang'),nl,write('Makasih udah main'),nl,!,fail.
 final_state:- nl.
 
 /*----------------------STATUS----------------------*/
@@ -356,5 +356,18 @@ status :-
 	write('Jumlah peluru yang tersisa : '),write(Peluru),nl,
 	write('Pelindung yang dipakai : '),write(Pelindung),nl,
 	write('Jumlah musuh yang tersisa : '),jumlahmusuh(A),write(A),nl.
+
+/*Cek menang kalah*/
+menang_kalah :-
+	jumlahmusuh(A),
+	A =:= 0,
+	write('menang'),!.
+
+
+menang_kalah :-
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+	Sehat =:= 0,
+	write('kalah'),!.
+	/*setelah itu keluar dari program*/
 
 /*----------------------START----------------------*/
