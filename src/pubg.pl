@@ -9,7 +9,7 @@ mulai :-
 	inis_musuh(tuyul),nl,
 	inis_musuh(ular),nl,
 	inis_musuh(polisi),nl,
-	createObjek.
+	createObjek,inis_pemain.
 
 tulis_perintah :-
 	lihat_perintah.
