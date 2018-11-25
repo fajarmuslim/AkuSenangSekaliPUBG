@@ -11,9 +11,6 @@ mulai :-
 	inis_musuh(polisi),nl,
 	tulis_perintah.
 
-tulis_logo :-
-	write('--------------------PUBG ITB---------------------\n').
-
 tulis_perintah :-
 	lihat_perintah.
 
@@ -284,19 +281,19 @@ priority(X,Y,'r ') :- obj(R,X,Y),armor(R),!.
 priority(X,Y,'a ') :- obj(A,X,Y),ammo(A),!.
 
 /*-------------------Inventori--------------------*/
-:-dynamic(inventori/6).
+:-dynamic(inventori/1).
 
 
 /*----------------------TAKE----------------------*/
 take(Objek) :-
 	write(Objek),
-	asserta(inventori(Objek)).
+	retract(inventori(Objek)).
 	/*tambah objek ke inventori pemain*/
 
 /*----------------------DROP----------------------*/
 drop(Objek) :-
 	write(Objek),
-	retract(inventori(Objek)).
+	asserta(inventori(Objek)).
 	/*buang objek dari inventori pemain*/
 
 /*----------------------USE----------------------*/
