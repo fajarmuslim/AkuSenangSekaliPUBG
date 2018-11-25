@@ -1,19 +1,28 @@
 /*SEBUAH GAME PUBG DENGAN PROLOG*/
 
 mulai :-
-	tulis_logo,nl,nl,nl,nl,nl,
+	tulis_logo,nl,
+	tulis_kalimatpembuka,nl,
 	inis_pemain,nl,
 	inis_musuh,nl,
-	tulis_perintah.
+	lihat_perintah.
 
 tulis_logo :-
-	write('--------------------PUBG ITB---------------------\n').
+	write('------------------------------PUBG ITB-----------------------------\n').
+
+tulis_kalimatpembuka :-
+	write('                    Selamat datang di game PUBG'),nl,
+	write('            Misi kamu adalah menjadi last man standing'),nl,
+	write('                        Bunuh musuh-musuhmu'),nl,
+	write('                       Jadilah yang terbaik'),nl,nl,
+	write('                          by : Mahasiswa'),nl.
 	
-tulis_perintah :-
+lihat_perintah :-
+	tab(3),write('-----------------Daftar Perintah----------------'),nl,
 	tab(3),write('mulai                  |mulai game'),nl,
-	tab(3),write('lihat_daftar           |tampilkan daftar perintah'),nl,
+	tab(3),write('lihat_perintah         |tampilkan daftar perintah'),nl,
 	tab(3),write('keluar                 |keluar dari game'),nl,
-	tab(3),write('look                   |melihat kondisi sekitar'),nl,
+	tab(3),write('lihat_sekitar          |melihat kondisi sekitar'),nl,
 	tab(3),write('map                    |buka peta'),nl,
 	tab(3),write('n                      |bergerak ke atas'),nl,
 	tab(3),write('s                      |bergerak ke bawah'),nl,
@@ -51,7 +60,7 @@ inis_pemain :-
 	asserta(inventori(Pelinding)),	
 	random(2,19,X),
 	random(2,19,Y),
-	write('Anda jatuh di :'),
+	write('Sekarang anda di :'),
 	write(X),write(' '),write(Y),
 	asserta(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
 
@@ -159,22 +168,22 @@ n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	inis_musuh.
+	map,inis_musuh.
 s :- 
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	inis_musuh.
+	map,inis_musuh.
 w :- 
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	inis_musuh.
+	map,inis_musuh.
 e :- 
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	inis_musuh.
+	map,inis_musuh.
 
 /*Fungsi menggambar map AxA*/
 map :- pemain(X,Y,O,P,Q,R),game(20,B,20,1,X,Y),printmatrix(B).
