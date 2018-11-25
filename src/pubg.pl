@@ -388,18 +388,6 @@ status :-
 	write('Pelindung yang dipakai : '),write(Pelindung),nl,
 	write('Jumlah musuh yang tersisa : '),jumlahmusuh(A),write(A),nl.
 
-/*Cek menang kalah*/
-menang_kalah :-
-	jumlahmusuh(A),
-	A =:= 0,
-	write('menang'),!.
-
-
-menang_kalah :-
-	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
-	Sehat =:= 0,
-	write('kalah'),!.
-	/*setelah itu keluar dari program*/
 /* save/load */
 save :-
 	open('savepemain.txt',write,Stream),
