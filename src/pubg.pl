@@ -393,6 +393,7 @@ load :-
 	read(S,H4),
 	read(S,H5),
 	read(S,H6),
+	close(S),
 	asserta(pemain(H1,H2,H3,H4,H5,H6)).
 
 /*----------------------START----------------------*/
