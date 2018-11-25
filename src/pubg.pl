@@ -115,14 +115,14 @@ inis_musuh(C) :-
 	write(' di :'),
 	random(2,19,Y),
 	write(X),write(' '),write(Y),
-	asserta(musuh(C,X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
+	asserta(musuh(C,X,Y,Sehat,Senjata,Peluru,Pelindung)).
 
 moveenemy :- musuh(Nama,X,Y,M,N,O,P),
 							random(-1,1,C),random(-1,1,D),V is X+C,W is Y+D,
 							retract(musuh(Nama,X,Y,M,N,O,P)),
-							asserta(musuh(Nama,C,D,M,N,O,P)),
+							asserta(musuh(Nama,V,W,M,N,O,P)),
 							write(Nama),
-							write(' bergerak ke :'),write(C),write(' '),write(C).
+							write(' bergerak ke :'),write(V),write(' '),write(W),nl.
 
 /*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
 
@@ -181,32 +181,28 @@ defense(kevlar,5).
 /*----------------------MOVE PLAYER OR ENEMY----------------------*/
 
 /*Fungsi Gerak*/
-/* masukin A bebas, gak ada pengaruh */
 n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke utara'),nl,deadzone,moveenemy,
-	map.
+	write('yey berhasil bergerak ke utara'),nl,c.
 s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke selatan'),nl,deadzone,moveenemy,
-	map.
+	write('yey berhasil bergerak ke selatan'),nl,c.
 w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke barat'),nl,deadzone,moveenemy,
-	map.
+	write('yey berhasil bergerak ke barat'),nl,c.
 e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke timur'),nl,deadzone,moveenemy,
-	map.
+	write('yey berhasil bergerak ke timur'),nl,c.
 
+c:- deadzone,moveenemy,inside_deadzone,map,kill,final_state.
 /*----------------------PRINT MAP----------------------*/
 /*Fungsi menggambar map AxA*/
 map :- pemain(X,Y,O,P,Q,R),deadzoneCounter(Time,Size),game(20,B,20,Size,X,Y),printmatrix(B).
@@ -306,8 +302,8 @@ drop(Objek) :-
 /*----------------------USE----------------------*/
 
 /*----------------------ATTACK (FAIL DAN GOAL STATE DI CEK DISINI)---------------------- */
-/*Pemain melakukan serangan*/
 
+/*Pemain melakukan serangan*/
 serang :-
 	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
   musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
@@ -321,13 +317,35 @@ serang :-
   retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
 	asserta(pemain(X,Y,Sehat_sekarang,Senjata,Peluru_sekarang,Pelindung)),
 	retract(musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)),
-	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),write('nice shot'),nl,kill,deadzone,moveenemy,!.
+	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),write('nice shot'),nl,deadzone,moveenemy,inside_deadzone,kill,final_state,!.
+serang:- write('Gaada musuh'),nl.
 
-	kill:- 	musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
-					SehatMusuh =< 0,!,
-					jumlahmusuh(A),B is A-1 , retract(jumlahmusuh(A)),asserta(jumlahmusuh(B)),
-					write('Musuh gugur 1'),nl,
-					retract(musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)).
+/* Mengecek apakah ada musuh yang health <= 0 */
+kill:- 	musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
+				SehatMusuh =< 0,!,
+				jumlahmusuh(A),B is A-1 , retract(jumlahmusuh(A)),asserta(jumlahmusuh(B)),
+				write('Musuh gugur 1'),nl,
+				retract(musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)).
+kill:- nl.
+
+/* Cek apakah player atau musuh berada di deadzone (lgsg mati)*/
+inside_deadzone:- musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
+										deadzoneCounter(Time,Size), Z is 20-Size,
+										(X =< Size ; X>= Z ; Y =< Size ; Y >= Z ),!,
+										retract(musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)),
+										asserta(musuh(Nama,X,Y,0,SenjataMusuh,PeluruMusuh,PelindungMusuh)).
+
+inside_deadzone:- pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+									deadzoneCounter(Time,Size), Z is 20-Size,
+									(X =< Size ; X>= Z ; Y =< Size ; Y >= Z ),!,
+									retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
+									asserta(pemain(X,Y,0,Senjata,Peluru,Pelindung)).
+inside_deadzone:- nl.
+
+final_state:- pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),Sehat =< 0,!,write('Kamu Kalah'),nl.
+final_state:- jumlahmusuh(0),!,write('Kamu Menang'),nl.
+final_state:- nl.
+
 /*----------------------STATUS----------------------*/
 /*cek status pemain*/
 status :-
