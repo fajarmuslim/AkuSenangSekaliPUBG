@@ -186,25 +186,25 @@ n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke utara'),nl,deadzone,moveenemy,
+	write('pemain berhasil bergerak ke utara'),nl,deadzone,moveenemy,
 	map.
 s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke selatan'),nl,deadzone,moveenemy,
+	write('pemain berhasil bergerak ke selatan'),nl,deadzone,moveenemy,
 	map.
 w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke barat'),nl,deadzone,moveenemy,
+	write('pemain berhasil bergerak ke barat'),nl,deadzone,moveenemy,
 	map.
 e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke timur'),nl,deadzone,moveenemy,
+	write('pemain berhasil bergerak ke timur'),nl,deadzone,moveenemy,
 	map.
 
 /*----------------------PRINT MAP----------------------*/
@@ -339,4 +339,17 @@ status :-
 	write('Pelindung yang dipakai : '),write(Pelindung),nl,
 	write('Jumlah musuh yang tersisa : '),jumlahmusuh(A),write(A),nl.
 
+/*Cek menang kalah*/
+menang_kalah :-
+	jumlahmusuh(A),
+	A =:= 0,
+	write('menang'),!.
+	
+	
+menang_kalah :-
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+	Sehat =:= 0,
+	write('kalah'),!. 
+	/*setelah itu keluar dari program*/
+	
 /*----------------------START----------------------*/
