@@ -5,16 +5,16 @@ mulai :-
 	tulis_kalimatpembuka,nl,
 	inis_pemain,nl,
 	asserta(jumlahmusuh(0)),
-  inis_musuh(tuyul),nl,
-  inis_musuh(ular),nl,
-  inis_musuh(polisi),nl,
-	asserta(deadzoneCounter(0,1)),
+	inis_musuh(tuyul),nl,
+	inis_musuh(ular),nl,
+	inis_musuh(polisi),nl,
 	tulis_perintah.
 
 tulis_logo :-
 	write('--------------------PUBG ITB---------------------\n').
 
 tulis_perintah :-
+	inis_musuh(tuyul),nl,
 	lihat_perintah.
 
 tulis_logo :-
@@ -110,7 +110,9 @@ inis_musuh(C) :-
 	inis_peluru(Peluru),
 	inis_pelindung(Pelindung),
 	random(2,19,X),
-	write('Muncul musuh di :'),
+	write('Muncul musuh '),
+	write(C),
+	write(' di :'),
 	random(2,19,Y),
 	write(X),write(' '),write(Y),
 	asserta(musuh(C,X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
@@ -172,30 +174,34 @@ defense(kevlar,5).
 
 /*----------------------MOVE PLAYER OR ENEMY----------------------*/
 
-/*----------------------PRINT MAP----------------------*/
 /*Fungsi Gerak*/
 /* masukin A bebas, gak ada pengaruh */
 n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	deadzone,kill.
+	write('yey berhasil bergerak ke utara'),nl,
+	map.
 s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	deadzone,kill.
+	write('yey berhasil bergerak ke selatan'),nl,
+	map.
 w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	deadzone,kill.
+	write('yey berhasil bergerak ke barat'),nl,
+	map.
 e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	deadzone,kill.
+	write('yey berhasil bergerak ke timur'),nl,
+	map.
 
+/*----------------------PRINT MAP----------------------*/
 /*Fungsi menggambar map AxA*/
 map :- pemain(X,Y,O,P,Q,R),game(20,B,20,1,X,Y),printmatrix(B).
 /*
@@ -277,6 +283,7 @@ priority(X,Y,'a ') :- obj(A,X,Y),ammo(A),!.
 
 /*-------------------Inventori--------------------*/
 :-dynamic(inventori/6).
+
 
 /*----------------------TAKE----------------------*/
 take(Objek) :-
