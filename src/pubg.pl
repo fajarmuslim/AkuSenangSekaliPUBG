@@ -6,6 +6,7 @@ mulai :-
 	inis_pemain,nl,
 	asserta(jumlahmusuh(0)),
 	asserta(deadzoneCounter(0,1)),
+	asserta(inventori([])),
 	inis_musuh(tuyul),nl,
 	inis_musuh(ular),nl,
 	inis_musuh(polisi),nl,
@@ -31,6 +32,9 @@ lihat_perintah :-
 	tab(3),write('keluar                 |keluar dari game'),nl,
 	tab(3),write('look                   |melihat kondisi sekitar'),nl,
 	tab(3),write('map                    |buka peta'),nl,
+	tab(3),write('take                   |ambil item'),nl,
+	tab(3),write('drop(A)                |buang item'),nl,
+	tab(3),write('useitem                |pakai item'),nl,
 	tab(3),write('n                      |bergerak ke atas'),nl,
 	tab(3),write('s                      |bergerak ke bawah'),nl,
 	tab(3),write('w                      |bergerak ke kiri'),nl,
@@ -69,7 +73,7 @@ inis_pemain :-
 	inis_pelindung(Pelindung),
 	/*catat senjata dan pelindung yang dibawa pemain pada inventori*/
 	asserta(inventori(Senjata)),
-	asserta(inventori(Pelinding)),
+	asserta(inventori(Pelindung)),
 	random(2,19,X),
 	random(2,19,Y),
 	write('Sekarang anda di :'),
@@ -83,11 +87,7 @@ inis_pemain :-
 
 /*fungsi random(A,B,X) menghasilkan sebuah angka random antara A dan B*/
 
-coba :-
-	random(1,23,X),
-	write(X).
-
-list_senjata([basoka,pistol,ketapel]).
+list_senjata([ak47,m4a1]).
 list_pelindung([tameng,helm,celana,baju]).
 list_ammo(10,40,60,80,100).
 list_sehat(10,40,60,80,100).
@@ -134,9 +134,6 @@ ammo(ammo_m4a1).
 /*weapon(NAMA,DAMAGE)*/
 damage(ak47,20).
 damage(m4a1,15).
-/*ammo(NAMA,MAGSIZE)*/
-magsize(ak47,20).
-magsize(m4a1,15).
 
 /*----------------------DEFINISI MEDICINE----------------------*/
 
@@ -285,18 +282,35 @@ priority(X,Y,'a ') :- obj(A,X,Y),ammo(A),!.
 
 
 /*----------------------TAKE----------------------*/
-take(Objek) :-
-	write(Objek),
-	retract(inventori(Objek)).
+take :-
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+	obj(Nama,M,N),
+	write('berhasil'),
+	inventori(List),
+	asserta(inventori([Nama|List])),
+	retract(inventori(List)).
 	/*tambah objek ke inventori pemain*/
 
 /*----------------------DROP----------------------*/
 drop(Objek) :-
-	write(Objek),
-	asserta(inventori(Objek)).
+	finditem(A,List,NewList),
+	write('berhasil'),
+	retract(inventori(List)),asserta(inventori(NewList)),
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),asserta(obj(Objek,X,Y)).
 	/*buang objek dari inventori pemain*/
 
 /*----------------------USE----------------------*/
+useitem(A):- inventori(List),finditem(A,List,NewList),retract(inventori(List)),asserta(inventori(NewList)),effect(A).
+
+finditem(A,[],[]):- write('Item tidak ada'),fail.
+finditem(A,[B|C],C):- A=:=B,!.
+finditem(A,[B|C],[B|D]):- finditem(A,C,D).
+
+effect(A):- medic(A),!, heal(A,B),pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+						Sehat_sekarang is Sehat + B,
+						retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
+						asserta(pemain(X,Y,Sehat_sekarang,Senjata,Peluru_sekarang,Pelindung)).
+
 
 /*----------------------ATTACK (FAIL DAN GOAL STATE DI CEK DISINI)---------------------- */
 
@@ -304,6 +318,7 @@ drop(Objek) :-
 serang :-
 	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
   musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
+	Peluru > 0,
 	T is X+1 , U is X-1 , V is Y+1 , W is Y-1,
 	(M =:= T ; M =:= U ),( N =:= V ; N =:= W),!,
 	damage(Senjata,DamageSenjata),damage(SenjataMusuh,DamageSenjataMusuh),
@@ -366,7 +381,7 @@ menang_kalah :-
 	Sehat =:= 0,
 	write('kalah'),!.
 	/*setelah itu keluar dari program*/
-	
+
 /* save/load */
 save :-
 	open('savepemain.txt',write,Stream),
@@ -384,7 +399,7 @@ save :-
 	write(Stream,Pelindung),
 	write(Stream,'.\n'),
 	close(Stream).
-	
+
 load :-
 	open('savepemain.txt',read,S),
 	read(S,H1),
