@@ -1,17 +1,20 @@
 /*SEBUAH GAME PUBG DENGAN PROLOG*/
 
 mulai :-
-	write('Tulis logo'),nl,nl,nl,nl,nl,
-  inis_pemain,nl,
-  inis_musuh,nl,
+	tulis_logo,nl,nl,nl,nl,nl,
+	inis_pemain,nl,
+	inis_musuh,nl,
 	tulis_perintah.
 
+tulis_logo :-
+	write('--------------------PUBG ITB---------------------\n').
+	
 tulis_perintah :-
 	tab(3),write('mulai                  |mulai game'),nl,
 	tab(3),write('lihat_daftar           |tampilkan daftar perintah'),nl,
 	tab(3),write('keluar                 |keluar dari game'),nl,
 	tab(3),write('look                   |melihat kondisi sekitar'),nl,
-  tab(3),write('map                    |buka peta'),nl,
+	tab(3),write('map                    |buka peta'),nl,
 	tab(3),write('n                      |bergerak ke atas'),nl,
 	tab(3),write('s                      |bergerak ke bawah'),nl,
 	tab(3),write('w                      |bergerak ke kiri'),nl,
@@ -25,16 +28,6 @@ tulis_perintah :-
 /* Dynamic untuk mencatat posisi player*/
 :-dynamic(pemain/6).
 
-inis_pemain :-
-	inis_sehat(Sehat),
-	inis_senjata(Senjata),
-	inis_peluru(Peluru),
-	inis_pelindung(Pelindung),
-	random(2,19,X),
-	random(2,19,Y),
-  write('Anda jatuh di :'),
-  write(X),write(' '),write(Y),
-	asserta(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
 
 /*maksimal tingkat kesehatan*/
 maksimal_sehat(100).
@@ -47,6 +40,21 @@ inis_sehat(100).
 inis_senjata(ketapel).
 inis_peluru(100).
 inis_pelindung(tameng).
+
+inis_pemain :-
+	inis_sehat(Sehat),
+	inis_senjata(Senjata),
+	inis_peluru(Peluru),
+	inis_pelindung(Pelindung),
+	/*catat senjata dan pelindung yang dibawa pemain pada inventori*/
+	asserta(inventori(Senjata)),
+	asserta(inventori(Pelinding)),	
+	random(2,19,X),
+	random(2,19,Y),
+	write('Anda jatuh di :'),
+	write(X),write(' '),write(Y),
+	asserta(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
+
 
 /*Fakta Enemy*/
 :-dynamic(musuh/7).
@@ -75,17 +83,17 @@ choose(List, Elt) :-
         nth0(Index, List, Elt).
 
 inis_musuh :-
-  enemy(Jenis),
+	enemy(Jenis),
 	inis_sehat(Sehat),
 	inis_senjata(Senjata),
 	inis_peluru(Peluru),
 	inis_pelindung(Pelindung),
 	random(2,19,X),
 	random(2,19,Y),
-  write('Muncul musuh di :'),
-  write(X),write(' '),write(Y),
+	write('Muncul musuh di :'),
+	write(X),write(' '),write(Y),
 	asserta(musuh(Jenis,X,Y,Sehat,Senjata,Peluru,Pelindung)),
-  asserta(obj(tuyul,X,Y)),!.
+	asserta(obj(tuyul,X,Y)),!.
 
 
 /*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
@@ -231,14 +239,19 @@ priority(X,Y,'w ') :- obj(W,X,Y),weapon(W),!.
 priority(X,Y,'r ') :- obj(R,X,Y),armor(R),!.
 priority(X,Y,'a ') :- obj(A,X,Y),ammo(A),!.
 
+/*-------------------Inventori--------------------*/
+:-dynamic(inventori/6).
+
 /*----------------------TAKE----------------------*/
 take(Objek) :-
-	write(Objek).
+	write(Objek),
+	asserta(inventori(Objek)).
 	/*tambah objek ke inventori pemain*/
 
 /*----------------------DROP----------------------*/
 drop(Objek) :-
-	write(Objek).
+	write(Objek),
+	retract(inventori(Objek)).
 	/*buang objek dari inventori pemain*/
 
 /*----------------------USE----------------------*/
