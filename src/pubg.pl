@@ -158,11 +158,13 @@ defense(kevlar,5).
 n :- 
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(X,Z,M,N,O,P)),inis_musuh.
+	asserta(pemain(X,Z,M,N,O,P)),
+	inis_musuh.
 s :- 
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(X,Z,M,N,O,P)),inis_musuh.
+	asserta(pemain(X,Z,M,N,O,P)),
+	inis_musuh.
 w :- 
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
