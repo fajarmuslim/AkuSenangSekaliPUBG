@@ -5,6 +5,7 @@ mulai :-
 	tulis_kalimatpembuka,nl,
 	inis_pemain,nl,
 	asserta(jumlahmusuh(0)),
+	asserta(deadzoneCounter(0,1)),
 	inis_musuh(tuyul),nl,
 	inis_musuh(ular),nl,
 	inis_musuh(polisi),nl,
@@ -14,7 +15,6 @@ tulis_logo :-
 	write('--------------------PUBG ITB---------------------\n').
 
 tulis_perintah :-
-	inis_musuh(tuyul),nl,
 	lihat_perintah.
 
 tulis_logo :-
@@ -117,6 +117,12 @@ inis_musuh(C) :-
 	write(X),write(' '),write(Y),
 	asserta(musuh(C,X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
 
+moveenemy :- musuh(Nama,X,Y,M,N,O,P),
+							random(-1,1,C),random(-1,1,D),V is X+C,W is Y+D,
+							retract(musuh(Nama,X,Y,M,N,O,P)),
+							asserta(musuh(Nama,C,D,M,N,O,P)),
+							write(Nama),
+							write(' bergerak ke :'),write(C),write(' '),write(C).
 
 /*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
 
@@ -180,30 +186,30 @@ n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke utara'),nl,
+	write('yey berhasil bergerak ke utara'),nl,deadzone,moveenemy,
 	map.
 s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke selatan'),nl,
+	write('yey berhasil bergerak ke selatan'),nl,deadzone,moveenemy,
 	map.
 w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke barat'),nl,
+	write('yey berhasil bergerak ke barat'),nl,deadzone,moveenemy,
 	map.
 e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke timur'),nl,
+	write('yey berhasil bergerak ke timur'),nl,deadzone,moveenemy,
 	map.
 
 /*----------------------PRINT MAP----------------------*/
 /*Fungsi menggambar map AxA*/
-map :- pemain(X,Y,O,P,Q,R),game(20,B,20,1,X,Y),printmatrix(B).
+map :- pemain(X,Y,O,P,Q,R),deadzoneCounter(Time,Size),game(20,B,20,Size,X,Y),printmatrix(B).
 /*
 utk game :
 param1 nilai sama dengan param3 (utk iterasi)
@@ -315,7 +321,7 @@ serang :-
   retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
 	asserta(pemain(X,Y,Sehat_sekarang,Senjata,Peluru_sekarang,Pelindung)),
 	retract(musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)),
-	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),write('nice shot'),nl,kill,!.
+	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),write('nice shot'),nl,kill,deadzone,moveenemy,!.
 
 	kill:- 	musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
 					SehatMusuh =< 0,!,
