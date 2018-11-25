@@ -3,9 +3,10 @@
 /*----------------------DEFINISI STAT PLAYER AWAL DAN ENEMY----------------------*/
 /* Dynamic untuk mencatat posisi player*/
 :-dynamic(pemain/2).
+:-dynamic(jumlah_enemy/2)
+:-dynamic(enemy/3) /* (jenis,koord.x,koord.y)*/
 
 /*Fakta Enemy*/
-enemy(tuyul).
 
 /*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
 
