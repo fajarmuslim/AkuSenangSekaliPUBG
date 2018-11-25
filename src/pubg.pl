@@ -3,13 +3,14 @@
 mulai :-
 	tulis_logo,nl,
 	tulis_kalimatpembuka,nl,
-	inis_pemain,nl,
 	asserta(jumlahmusuh(0)),
 	asserta(deadzoneCounter(0,1)),
+	tulis_perintah,nl,nl,
+	inis_pemain,nl,
 	inis_musuh(tuyul),nl,
 	inis_musuh(ular),nl,
 	inis_musuh(polisi),nl,
-	tulis_perintah.
+	createObjek.
 
 tulis_perintah :-
 	lihat_perintah.
@@ -87,10 +88,6 @@ coba :-
 	random(1,23,X),
 	write(X).
 
-list_senjata([basoka,pistol,ketapel]).
-list_pelindung([tameng,helm,celana,baju]).
-list_ammo(10,40,60,80,100).
-list_sehat(10,40,60,80,100).
 /*musuh juga bisa bergerak secara random*/
 /*random senjata dan pelindung juga bisa dilakukan*/
 
@@ -166,11 +163,38 @@ defense(kevlar,5).
 
 /*----------------------DEFINISI MAP AWAL----------------------*/
 
-
+createObjek :- 
+	random(2,19,A),
+	random(2,19,B),
+	asserta(obj(helm,A,B)),
+	write('helm berhasil ditambahkan pada koordinat ('),write(A),write(','),write(B),write(')'),nl,
+	
+	random(2,19,C),
+	random(2,19,D),
+	asserta(obj(kevlar,C,D)),
+	write('kevlar berhasil ditambahkan pada koordinat ('),write(C),write(','),write(D),write(')'),nl,
+	
+	random(2,19,E),
+	random(2,19,F),
+	asserta(obj(pill,E,F)),
+	write('pill berhasil ditambahkan pada koordinat ('),write(E),write(','),write(F),write(')'),nl,
+	
+	random(2,19,G),
+	random(2,19,H),
+	asserta(obj(plester,G,H)),
+	write('plester berhasil ditambahkan pada koordinat ('),write(G),write(','),write(H),write(')'),nl,
+	
+	random(2,19,I),
+	random(2,19,J),
+	asserta(obj(ak47,I,J)),
+	write('ak47 berhasil ditambahkan pada koordinat ('),write(I),write(','),write(J),write(')'),nl,
+	
+	random(2,19,K),
+	random(2,19,L),
+	asserta(obj(m4a1,K,L)),
+	write('m4a1 berhasil ditambahkan pada koordinat ('),write(K),write(','),write(L),write(')'),nl.
+	
 /*RULE*/
-
-/*===========RULE DASAR==============*/
-/*GENERATE RANDOM POSISITION*/
 
 
 /*===========RULE COMMAND==============*/
@@ -182,22 +206,22 @@ n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke utara'),nl,c.
+	write('pemain berhasil bergerak ke utara'),nl,c.
 s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(X,Z,M,N,O,P)),
-	write('yey berhasil bergerak ke selatan'),nl,c.
+	write('pemain berhasil bergerak ke selatan'),nl,c.
 w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke barat'),nl,c.
+	write('pemain berhasil bergerak ke barat'),nl,c.
 e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
 	asserta(pemain(Z,Y,M,N,O,P)),
-	write('yey berhasil bergerak ke timur'),nl,c.
+	write('pemain berhasil bergerak ke timur'),nl,c,createObjek.
 
 c:- deadzone,moveenemy,inside_deadzone,map,kill,final_state.
 /*----------------------PRINT MAP----------------------*/
@@ -286,16 +310,26 @@ priority(X,Y,'a ') :- obj(A,X,Y),ammo(A),!.
 
 /*----------------------TAKE----------------------*/
 take(Objek) :-
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+	obj(A,E,F),
+	X =:= E, Y =:= F,
+	write('Selamat kamu udah nambahin '),
 	write(Objek),
-	retract(inventori(Objek)).
+	write(' ke inventori'),nl,
+	asserta(inventori(Objek)),!.
 	/*tambah objek ke inventori pemain*/
-
+take(Objek) :- 
+	write('tidak bisa mengambil objek tersebut'),nl,!.
+	
 /*----------------------DROP----------------------*/
 drop(Objek) :-
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
 	write(Objek),
-	asserta(inventori(Objek)).
+	write(' berhasil dibuang di koordinat ('),write(X),write(','),write(Y),write(')'),nl,
+	retract(inventori(Objek)),
+	asserta(obj(Objek,X,Y)),!.
 	/*buang objek dari inventori pemain*/
-
+	
 /*----------------------USE----------------------*/
 
 /*----------------------ATTACK (FAIL DAN GOAL STATE DI CEK DISINI)---------------------- */
@@ -303,7 +337,7 @@ drop(Objek) :-
 /*Pemain melakukan serangan*/
 serang :-
 	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
-  musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
+	musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
 	T is X+1 , U is X-1 , V is Y+1 , W is Y-1,
 	(M =:= T ; M =:= U ),( N =:= V ; N =:= W),!,
 	damage(Senjata,DamageSenjata),damage(SenjataMusuh,DamageSenjataMusuh),
@@ -311,7 +345,7 @@ serang :-
 	Sehat_sekarang is Sehat - DamageSenjataMusuh + Defense,
 	SehatMusuh_sekarang is SehatMusuh - DamageSenjata + DefenseMusuh,
 	Peluru_sekarang is Peluru-10,
-  retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
+	retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
 	asserta(pemain(X,Y,Sehat_sekarang,Senjata,Peluru_sekarang,Pelindung)),
 	retract(musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)),
 	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),write('nice shot'),nl,deadzone,moveenemy,inside_deadzone,kill,final_state,!.
@@ -366,7 +400,6 @@ menang_kalah :-
 	Sehat =:= 0,
 	write('kalah'),!.
 	/*setelah itu keluar dari program*/
-	
 /* save/load */
 save :-
 	open('savepemain.txt',write,Stream),
@@ -396,4 +429,3 @@ load :-
 	close(S),
 	asserta(pemain(H1,H2,H3,H4,H5,H6)).
 
-/*----------------------START----------------------*/
