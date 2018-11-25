@@ -155,10 +155,24 @@ defense(kevlar,5).
 /*----------------------PRINT MAP----------------------*/
 /*Fungsi Gerak*/
 /* masukin A bebas, gak ada pengaruh */
-n :- pemain(X,Y,M,N,O,P),Z is Y-1,retract(pemain(X,Y,M,N,O,P)),asserta(pemain(X,Z,M,N,O,P)).
-s :- pemain(X,Y,M,N,O,P),Z is Y+1,retract(pemain(X,Y,M,N,O,P)),asserta(pemain(X,Z,M,N,O,P)).
-w :- pemain(X,Y,M,N,O,P),Z is X-1,retract(pemain(X,Y,M,N,O,P)),asserta(pemain(Z,Y,M,N,O,P)).
-e :- pemain(X,Y,M,N,O,P),Z is X+1,retract(pemain(X,Y,M,N,O,P)),asserta(pemain(Z,Y,M,N,O,P)).
+n :- 
+	pemain(X,Y,M,N,O,P),Z is Y-1,
+	retract(pemain(X,Y,M,N,O,P)),
+	asserta(pemain(X,Z,M,N,O,P)),inis_musuh.
+s :- 
+	pemain(X,Y,M,N,O,P),Z is Y+1,
+	retract(pemain(X,Y,M,N,O,P)),
+	asserta(pemain(X,Z,M,N,O,P)),inis_musuh.
+w :- 
+	pemain(X,Y,M,N,O,P),Z is X-1,
+	retract(pemain(X,Y,M,N,O,P)),
+	asserta(pemain(Z,Y,M,N,O,P)),
+	inis_musuh.
+e :- 
+	pemain(X,Y,M,N,O,P),Z is X+1,
+	retract(pemain(X,Y,M,N,O,P)),
+	asserta(pemain(Z,Y,M,N,O,P)),
+	inis_musuh.
 
 /*Fungsi menggambar map AxA*/
 map :- pemain(X,Y,O,P,Q,R),game(20,B,20,1,X,Y),printmatrix(B).
