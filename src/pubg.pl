@@ -4,6 +4,16 @@ mulai :-
 	tulis_logo,nl,
 	tulis_kalimatpembuka,nl,
 	inis_pemain,nl,
+	asserta(jumlahmusuh(0)),
+  inis_musuh(tuyul),nl,
+  inis_musuh(ular),nl,
+  inis_musuh(polisi),nl,
+	tulis_perintah.
+
+tulis_logo :-
+	write('--------------------PUBG ITB---------------------\n').
+
+tulis_perintah :-
 	inis_musuh,nl,
 	lihat_perintah.
 
@@ -16,13 +26,13 @@ tulis_kalimatpembuka :-
 	write('                        Bunuh musuh-musuhmu'),nl,
 	write('                       Jadilah yang terbaik'),nl,nl,
 	write('                          by : Mahasiswa'),nl.
-	
+
 lihat_perintah :-
 	tab(3),write('-----------------Daftar Perintah----------------'),nl,
 	tab(3),write('mulai                  |mulai game'),nl,
 	tab(3),write('lihat_perintah         |tampilkan daftar perintah'),nl,
 	tab(3),write('keluar                 |keluar dari game'),nl,
-	tab(3),write('lihat_sekitar          |melihat kondisi sekitar'),nl,
+	tab(3),write('look        				   |melihat kondisi sekitar'),nl,
 	tab(3),write('map                    |buka peta'),nl,
 	tab(3),write('n                      |bergerak ke atas'),nl,
 	tab(3),write('s                      |bergerak ke bawah'),nl,
@@ -46,9 +56,9 @@ maksimal_peluru(100).
 
 /*inisialisasi atribut pemain*/
 inis_sehat(100).
-inis_senjata(ketapel).
+inis_senjata(ak47).
 inis_peluru(100).
-inis_pelindung(tameng).
+inis_pelindung(helm).
 
 inis_pemain :-
 	inis_sehat(Sehat),
@@ -57,7 +67,7 @@ inis_pemain :-
 	inis_pelindung(Pelindung),
 	/*catat senjata dan pelindung yang dibawa pemain pada inventori*/
 	asserta(inventori(Senjata)),
-	asserta(inventori(Pelinding)),	
+	asserta(inventori(Pelinding)),
 	random(2,19,X),
 	random(2,19,Y),
 	write('Sekarang anda di :'),
@@ -67,6 +77,7 @@ inis_pemain :-
 
 /*Fakta Enemy*/
 :-dynamic(musuh/7).
+:-dynamic(jumlahmusuh/1).
 
 /*fungsi random(A,B,X) menghasilkan sebuah angka random antara A dan B*/
 
@@ -81,28 +92,23 @@ list_sehat(10,40,60,80,100).
 /*musuh juga bisa bergerak secara random*/
 /*random senjata dan pelindung juga bisa dilakukan*/
 
-
-
-enemy(tuyul).
-
 choose([], []).
 choose(List, Elt) :-
         length(List, Length),
         random(0, Length, Index),
         nth0(Index, List, Elt).
 
-inis_musuh :-
-	enemy(Jenis),
+inis_musuh(C) :-
+	jumlahmusuh(A),B is A+1 , retract(jumlahmusuh(A)),asserta(jumlahmusuh(B)),
 	inis_sehat(Sehat),
 	inis_senjata(Senjata),
 	inis_peluru(Peluru),
 	inis_pelindung(Pelindung),
 	random(2,19,X),
-	random(2,19,Y),
 	write('Muncul musuh di :'),
+	random(2,19,Y),
 	write(X),write(' '),write(Y),
-	asserta(musuh(Jenis,X,Y,Sehat,Senjata,Peluru,Pelindung)),
-	asserta(obj(tuyul,X,Y)),!.
+	asserta(musuh(C,X,Y,Sehat,Senjata,Peluru,Pelindung)),!.
 
 
 /*----------------------DEFINISI WEAPON DAN AMMO----------------------*/
@@ -164,26 +170,22 @@ defense(kevlar,5).
 /*----------------------PRINT MAP----------------------*/
 /*Fungsi Gerak*/
 /* masukin A bebas, gak ada pengaruh */
-n :- 
+n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(X,Z,M,N,O,P)),
-	map,inis_musuh.
-s :- 
+	asserta(pemain(X,Z,M,N,O,P)).
+s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(X,Z,M,N,O,P)),
-	map,inis_musuh.
-w :- 
+	asserta(pemain(X,Z,M,N,O,P)).
+w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(Z,Y,M,N,O,P)),
-	map,inis_musuh.
-e :- 
+	asserta(pemain(Z,Y,M,N,O,P)).
+e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(Z,Y,M,N,O,P)),
-	map,inis_musuh.
+	asserta(pemain(Z,Y,M,N,O,P)).
 
 /*Fungsi menggambar map AxA*/
 map :- pemain(X,Y,O,P,Q,R),game(20,B,20,1,X,Y),printmatrix(B).
@@ -233,7 +235,7 @@ printlist([A|B]) :- printlist(B),print(A).
 
 /* Fungsi Look Utama*/
 /* look dengan pusat X,Y*/
-lihat_sekitar :- pemain(M,N,O,P,Q,R),game(20,B,20,1,M,N),looky(20,B,C,20,M,N),cek_obj(C,D,M,N),printmatrix(D).
+look :- pemain(M,N,O,P,Q,R),game(20,B,20,1,M,N),looky(20,B,C,20,M,N),cek_obj(C,D,M,N),printmatrix(D).
 
 looky(A,[D|B],[C|[]],M,X,Y) :- Z is Y-1,A =:= Z,!,lookx(M,D,C,M,X).
 looky(A,[D|B],[C|F],M,X,Y):- A=:=Y,!,lookx(M,D,C,M,X),E is A-1,looky(E,B,F,M,X,Y).
@@ -258,7 +260,7 @@ cek_objx([A|B],[A|D],X,Y):- V is X-1,cek_objx(B,D,V,Y).
 /* Mengecek prioritas objek*/
 /*Enemy > Medicine > Weapon > Armor > Ammo > pemain*/
 
-priority(X,Y,'e ') :- obj(E,X,Y),enemy(E),!.
+priority(X,Y,'e ') :- musuh(C,X,Y,Sehat,Senjata,Peluru,Pelindung),!.
 priority(X,Y,'m ') :- obj(M,X,Y),medic(M),!.
 priority(X,Y,'w ') :- obj(W,X,Y),weapon(W),!.
 priority(X,Y,'r ') :- obj(R,X,Y),armor(R),!.
@@ -283,31 +285,31 @@ drop(Objek) :-
 
 /*----------------------ATTACK (FAIL DAN GOAL STATE DI CEK DISINI)---------------------- */
 /*Pemain melakukan serangan*/
-/*
+
 serang :-
 	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+  musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
+	M is X+1;M is X-1,N is Y-1;N is Y+1,!,
+	damage(Senjata,DamageSenjata),damage(SenjataMusuh,DamageSenjataMusuh),
+	defense(Pelindung,Defense),defense(PelindungMusuh,DefenseMusuh),
+	Sehat_sekarang is Sehat - DamageSenjataMusuh + Defense,
+	SehatMusuh_sekarang is SehatMusuh - DamageSenjata + DefenseMusuh,
 	Peluru_sekarang is Peluru-10,
-	retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
-	asserta(pemain(X,Y,Sehat,Senjata,Peluru_sekarang,Pelindung)),!.
+  retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
+	asserta(pemain(X,Y,Sehat_Sekarang,Senjata,Peluru_sekarang,Pelindung)),
+	retract(musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)),
+	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),!.
 
-  diserang :-
-  	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
-  	senjata(Senjata,Kerusakan),
-  	Sehat_sekarang is Sehat - Kerusakan,
-  	retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
-  	asserta(pemain(X,Y,Sehat_sekarang,Senjata,Peluru,Pelindung)),!.
-
-
-*/
 
 /*----------------------STATUS----------------------*/
 /*cek status pemain*/
-status_pemain :-
+status :-
 	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
 	write('Koordinat posisi pemain pada ('),write(X), write(','), write(Y), write(')'),nl,
 	write('Tingkat kesehatan : '),write(Sehat),nl,
 	write('Senjata yang dipegang : '),write(Senjata),nl,
 	write('Jumlah peluru yang tersisa : '),write(Peluru),nl,
-	write('Pelindung yang dipakai : '),write(Pelindung),nl.
+	write('Pelindung yang dipakai : '),write(Pelindung),nl,
+	write('Jumlah musuh yang tersisa : '),jumlahmusuh(A),write(A),nl,.
 
 /*----------------------START----------------------*/
