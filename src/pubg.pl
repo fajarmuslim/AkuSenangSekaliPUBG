@@ -366,5 +366,33 @@ menang_kalah :-
 	Sehat =:= 0,
 	write('kalah'),!.
 	/*setelah itu keluar dari program*/
+	
+/* save/load */
+save :-
+	open('savepemain.txt',write,Stream),
+	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
+	write(Stream,X),
+	write(Stream,'.\n'),
+	write(Stream,Y),
+	write(Stream,'.\n'),
+	write(Stream,Sehat),
+	write(Stream,'.\n'),
+	write(Stream,Senjata),
+	write(Stream,'.\n'),
+	write(Stream,Peluru),
+	write(Stream,'.\n'),
+	write(Stream,Pelindung),
+	write(Stream,'.\n'),
+	close(Stream).
+	
+load :-
+	open('savepemain.txt',read,S),
+	read(S,H1),
+	read(S,H2),
+	read(S,H3),
+	read(S,H4),
+	read(S,H5),
+	read(S,H6),
+	asserta(pemain(H1,H2,H3,H4,H5,H6)).
 
 /*----------------------START----------------------*/
