@@ -8,13 +8,13 @@ mulai :-
   inis_musuh(tuyul),nl,
   inis_musuh(ular),nl,
   inis_musuh(polisi),nl,
+	asserta(deadzoneCounter(0,1)),
 	tulis_perintah.
 
 tulis_logo :-
 	write('--------------------PUBG ITB---------------------\n').
 
 tulis_perintah :-
-	inis_musuh,nl,
 	lihat_perintah.
 
 tulis_logo :-
@@ -32,7 +32,7 @@ lihat_perintah :-
 	tab(3),write('mulai                  |mulai game'),nl,
 	tab(3),write('lihat_perintah         |tampilkan daftar perintah'),nl,
 	tab(3),write('keluar                 |keluar dari game'),nl,
-	tab(3),write('look        				   |melihat kondisi sekitar'),nl,
+	tab(3),write('look                   |melihat kondisi sekitar'),nl,
 	tab(3),write('map                    |buka peta'),nl,
 	tab(3),write('n                      |bergerak ke atas'),nl,
 	tab(3),write('s                      |bergerak ke bawah'),nl,
@@ -41,6 +41,11 @@ lihat_perintah :-
 
 
 
+/*----------------------DEFINISI TRIGGER DEADZONE----------------------*/
+:-dynamic(deadzoneCounter/2).
+
+deadzone:- deadzoneCounter(A,B),C is A+1,C =:= 10,!,D is B+1,retract(deadzoneCounter(A,B)),asserta(deadzoneCounter(C,D)).
+deadzone:- deadzoneCounter(A,B),C is A+1,retract(deadzoneCounter(A,B)),asserta(deadzoneCounter(C,B)).
 
 
 /*----------------------DEFINISI STAT PLAYER AWAL DAN ENEMY----------------------*/
@@ -173,19 +178,23 @@ defense(kevlar,5).
 n :-
 	pemain(X,Y,M,N,O,P),Z is Y-1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(X,Z,M,N,O,P)).
+	asserta(pemain(X,Z,M,N,O,P)),
+	deadzone,kill.
 s :-
 	pemain(X,Y,M,N,O,P),Z is Y+1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(X,Z,M,N,O,P)).
+	asserta(pemain(X,Z,M,N,O,P)),
+	deadzone,kill.
 w :-
 	pemain(X,Y,M,N,O,P),Z is X-1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(Z,Y,M,N,O,P)).
+	asserta(pemain(Z,Y,M,N,O,P)),
+	deadzone,kill.
 e :-
 	pemain(X,Y,M,N,O,P),Z is X+1,
 	retract(pemain(X,Y,M,N,O,P)),
-	asserta(pemain(Z,Y,M,N,O,P)).
+	asserta(pemain(Z,Y,M,N,O,P)),
+	deadzone,kill.
 
 /*Fungsi menggambar map AxA*/
 map :- pemain(X,Y,O,P,Q,R),game(20,B,20,1,X,Y),printmatrix(B).
@@ -235,7 +244,7 @@ printlist([A|B]) :- printlist(B),print(A).
 
 /* Fungsi Look Utama*/
 /* look dengan pusat X,Y*/
-look :- pemain(M,N,O,P,Q,R),game(20,B,20,1,M,N),looky(20,B,C,20,M,N),cek_obj(C,D,M,N),printmatrix(D).
+look :- pemain(M,N,O,P,Q,R),deadzoneCounter(Time,Size),game(20,B,20,Size,M,N),looky(20,B,C,20,M,N),cek_obj(C,D,M,N),printmatrix(D).
 
 looky(A,[D|B],[C|[]],M,X,Y) :- Z is Y-1,A =:= Z,!,lookx(M,D,C,M,X).
 looky(A,[D|B],[C|F],M,X,Y):- A=:=Y,!,lookx(M,D,C,M,X),E is A-1,looky(E,B,F,M,X,Y).
@@ -289,18 +298,23 @@ drop(Objek) :-
 serang :-
 	pemain(X,Y,Sehat,Senjata,Peluru,Pelindung),
   musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
-	M is X+1;M is X-1,N is Y-1;N is Y+1,!,
+	T is X+1 , U is X-1 , V is Y+1 , W is Y-1,
+	(M =:= T ; M =:= U ),( N =:= V ; N =:= W),!,
 	damage(Senjata,DamageSenjata),damage(SenjataMusuh,DamageSenjataMusuh),
 	defense(Pelindung,Defense),defense(PelindungMusuh,DefenseMusuh),
 	Sehat_sekarang is Sehat - DamageSenjataMusuh + Defense,
 	SehatMusuh_sekarang is SehatMusuh - DamageSenjata + DefenseMusuh,
 	Peluru_sekarang is Peluru-10,
   retract(pemain(X,Y,Sehat,Senjata,Peluru,Pelindung)),
-	asserta(pemain(X,Y,Sehat_Sekarang,Senjata,Peluru_sekarang,Pelindung)),
+	asserta(pemain(X,Y,Sehat_sekarang,Senjata,Peluru_sekarang,Pelindung)),
 	retract(musuh(Nama,M,N,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)),
-	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),!.
+	asserta(musuh(Nama,M,N,SehatMusuh_sekarang,SenjataMusuh,PeluruMusuh,PelindungMusuh)),write('nice shot'),nl,kill,!.
 
-
+	kill:- 	musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh),
+					SehatMusuh =< 0,!,
+					jumlahmusuh(A),B is A-1 , retract(jumlahmusuh(A)),asserta(jumlahmusuh(B)),
+					write('Musuh gugur 1'),nl,
+					retract(musuh(Nama,X,Y,SehatMusuh,SenjataMusuh,PeluruMusuh,PelindungMusuh)).
 /*----------------------STATUS----------------------*/
 /*cek status pemain*/
 status :-
@@ -310,6 +324,6 @@ status :-
 	write('Senjata yang dipegang : '),write(Senjata),nl,
 	write('Jumlah peluru yang tersisa : '),write(Peluru),nl,
 	write('Pelindung yang dipakai : '),write(Pelindung),nl,
-	write('Jumlah musuh yang tersisa : '),jumlahmusuh(A),write(A),nl,.
+	write('Jumlah musuh yang tersisa : '),jumlahmusuh(A),write(A),nl.
 
 /*----------------------START----------------------*/
